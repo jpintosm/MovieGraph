@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Catálogo de Películas</h2>
+{% if request.session.usuario_rol == 'admin' %}
+    <a href="{% url 'crear_pelicula' %}">+ Nueva Película</a>
+{% endif %}
+<br><br>
+{% for pelicula in peliculas %}
+    <div>
+        <h3>{{ pelicula.titulo }} ({{ pelicula.anio }})</h3>
+        <p>Director: {{ pelicula.director }}</p>
+        <a href="{% url 'detalle_pelicula' pelicula.id %}">Ver detalle</a> |
+        {% if request.session.usuario_rol == 'admin' %}
+            <a href="{% url 'editar_pelicula' pelicula.id %}">Editar</a> |
+            <a href="{% url 'eliminar_pelicula' pelicula.id %}">Eliminar</a>
+        {% endif %}
+    </div>
+    <hr>
+{% empty %}
+    <p>No hay películas aún.</p>
+{% endfor %}
+{% endblock %}

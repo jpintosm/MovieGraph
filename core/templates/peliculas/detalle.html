@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ pelicula.titulo }} ({{ pelicula.anio }})</h2>
+<p>Director: {{ pelicula.director }}</p>
+<p>Actores: {{ pelicula.actores|join:", " }}</p>
+<p>Géneros: {{ pelicula.generos|join:", " }}</p>
+{% if pelicula.poster_url %}
+    <img src="{{ pelicula.poster_url }}" alt="Poster" width="200">
+{% endif %}
+<br>
+<a href="{% url 'editar_pelicula' pelicula.id %}">Editar</a> |
+<a href="{% url 'listar_peliculas' %}">Volver</a>
+{% endblock %}
