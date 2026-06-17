@@ -5,6 +5,7 @@ from .db import usuarios, peliculas
 import bcrypt
 from datetime import datetime
 from bson import ObjectId
+from moviegraph_project.neo4j_connection import crear_pelicula_neo4j, actualizar_pelicula_neo4j, eliminar_pelicula_neo4j
 
 def login_requerido(request):
     return "usuario_id" not in request.session
@@ -89,7 +90,10 @@ def crear_pelicula(request):
             "poster_url": request.POST.get("poster_url"),
             "resenas": []
         }
-        peliculas.insert_one(pelicula)
+        resultado = peliculas.insert_one(pelicula)
+
+        crear_pelicula_neo4j(str(resultado.inserted_id), pelicula)
+
         return redirect("listar_peliculas")
     return render(request, "peliculas/crear.html")
 
@@ -110,16 +114,26 @@ def editar_pelicula(request, id):
     
     pelicula = peliculas.find_one({"_id": ObjectId(id)})
     pelicula["_id"] = str(pelicula["_id"])
+
     if request.method == "POST":
-        peliculas.update_one({"_id": ObjectId(id)}, {"$set": {
+        pelicula_actualizada = {
             "titulo": request.POST.get("titulo"),
             "anio": int(request.POST.get("anio")),
             "generos": request.POST.get("generos").split(","),
             "director": request.POST.get("director"),
             "actores": request.POST.get("actores").split(","),
             "poster_url": request.POST.get("poster_url"),
-        }})
+        }
+
+        peliculas.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": pelicula_actualizada}
+        )
+
+        actualizar_pelicula_neo4j(id, pelicula_actualizada)
+
         return redirect("listar_peliculas")
+
     return render(request, "peliculas/editar.html", {"pelicula": pelicula})
 
 def eliminar_pelicula(request, id):
@@ -128,6 +142,9 @@ def eliminar_pelicula(request, id):
     
     if request.session.get("usuario_rol") != "admin":
         return redirect("listar_peliculas")
-    
+
     peliculas.delete_one({"_id": ObjectId(id)})
+
+    eliminar_pelicula_neo4j(id)
+
     return redirect("listar_peliculas")
