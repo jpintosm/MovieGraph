@@ -124,4 +124,11 @@ def eliminar_pelicula_neo4j(pelicula_id):
         "id": str(pelicula_id)
     })
 
+def obtener_peliculas_por_genero(genero):
+    resultado = neo4j_conn.query("""
+    MATCH (p:Pelicula)-[:PERTENECE_A]->(g:Genero {nombre: $genero})
+    RETURN p.id AS id
+    """, {"genero": genero})
+    return [r["id"] for r in resultado]
+
 neo4j_conn = Neo4jConnection()

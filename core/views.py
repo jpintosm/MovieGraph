@@ -5,7 +5,7 @@ from .db import usuarios, peliculas
 import bcrypt
 from datetime import datetime
 from bson import ObjectId
-from moviegraph_project.neo4j_connection import crear_pelicula_neo4j, actualizar_pelicula_neo4j, eliminar_pelicula_neo4j
+from moviegraph_project.neo4j_connection import crear_pelicula_neo4j, actualizar_pelicula_neo4j, eliminar_pelicula_neo4j, obtener_peliculas_por_genero
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 
@@ -120,10 +120,19 @@ def listar_peliculas(request):
     if login_requerido(request):
         return redirect("login")
     
-    lista = list(peliculas.find())
+    genero_filtro = request.GET.get("genero")
+    
+    if genero_filtro:
+        ids = obtener_peliculas_por_genero(genero_filtro)
+        object_ids = [ObjectId(id) for id in ids]
+        lista = list(peliculas.find({"_id": {"$in": object_ids}}))
+    else:
+        lista = list(peliculas.find())
+    
     for p in lista:
         p["id"] = str(p["_id"])
-    return render(request, "peliculas/listar.html", {"peliculas": lista})
+    
+    return render(request, "peliculas/listar.html", {"peliculas": lista, "genero_filtro": genero_filtro})
 
 def crear_pelicula(request):
     if login_requerido(request):

@@ -17,10 +17,37 @@
     {% endif %}
 </section>
 
+<section class="filtro-genero" style="margin-bottom: 30px;">
+    <form method="GET" action="{% url 'listar_peliculas' %}">
+        <label for="genero" style="font-weight: bold; margin-right: 10px;">Filtrar por género:</label>
+        
+        <select name="genero" id="genero" onchange="this.form.submit()" 
+                class="btn" 
+                style="padding: 8px 16px; border-radius: 4px; font-size: 1rem; cursor: pointer; border: none; color: white; font-weight: bold;">
+            <option value="" style="background-color: #222; color: white;">Todos los géneros</option>
+            <option value="Acción" {% if genero_filtro == "Acción" %}selected{% endif %} style="background-color: #222; color: white;">Acción</option>
+            <option value="Aventura" {% if genero_filtro == "Aventura" %}selected{% endif %} style="background-color: #222; color: white;">Aventura</option>
+            <option value="Animación" {% if genero_filtro == "Animación" %}selected{% endif %} style="background-color: #222; color: white;">Animación</option>
+            <option value="Comedia" {% if genero_filtro == "Comedia" %}selected{% endif %} style="background-color: #222; color: white;">Comedia</option>
+            <option value="Drama" {% if genero_filtro == "Drama" %}selected{% endif %} style="background-color: #222; color: white;">Drama</option>
+            <option value="Terror" {% if genero_filtro == "Terror" %}selected{% endif %} style="background-color: #222; color: white;">Terror</option>
+            <option value="Suspenso" {% if genero_filtro == "Suspenso" %}selected{% endif %} style="background-color: #222; color: white;">Suspenso</option>
+            <option value="Ciencia ficción" {% if genero_filtro == "Ciencia ficción" %}selected{% endif %} style="background-color: #222; color: white;">Ciencia ficción</option>
+            <option value="Fantasía" {% if genero_filtro == "Fantasía" %}selected{% endif %} style="background-color: #222; color: white;">Fantasía</option>
+            <option value="Romance" {% if genero_filtro == "Romance" %}selected{% endif %} style="background-color: #222; color: white;">Romance</option>
+            <option value="Documental" {% if genero_filtro == "Documental" %}selected{% endif %} style="background-color: #222; color: white;">Documental</option>
+            <option value="Crimen" {% if genero_filtro == "Crimen" %}selected{% endif %} style="background-color: #222; color: white;">Crimen</option>
+            <option value="Misterio" {% if genero_filtro == "Misterio" %}selected{% endif %} style="background-color: #222; color: white;">Misterio</option>
+            <option value="Musical" {% if genero_filtro == "Musical" %}selected{% endif %} style="background-color: #222; color: white;">Musical</option>
+        </select>
+        
+        <noscript><button type="submit" class="btn">Filtrar</button></noscript>
+    </form>
+</section>
 {% if peliculas %}
-    <section class="peliculas-grid">
+    <section class="peliculas-grid" style="justify-content: center; justify-items: center;">
         {% for pelicula in peliculas %}
-            <article class="pelicula-card">
+            <article class="pelicula-card" style="max-width: 300px; width: 100%;">
 
                 {% if pelicula.poster_url %}
                     <img src="{{ pelicula.poster_url }}" alt="Poster de {{ pelicula.titulo }}" class="poster">
