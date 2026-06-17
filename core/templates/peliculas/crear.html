@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Nueva Película</h2>
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="titulo" placeholder="Título" required><br>
+    <input type="number" name="anio" placeholder="Año" required><br>
+    <input type="text" name="generos" placeholder="Géneros (separados por coma)"><br>
+    <input type="text" name="director" placeholder="Director"><br>
+    <input type="text" name="actores" placeholder="Actores (separados por coma)"><br>
+    <input type="text" name="poster_url" placeholder="URL del poster"><br>
+    <button type="submit">Guardar</button>
+</form>
+<a href="{% url 'listar_peliculas' %}">Volver</a>
+{% endblock %}
