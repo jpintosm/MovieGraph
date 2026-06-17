@@ -161,6 +161,15 @@ def crear_pelicula(request):
         ):
             return render(request, "peliculas/crear.html")
 
+        #evitar duplicacion de pelicula en crear
+        pelicula_existente = peliculas.find_one({
+            "titulo": titulo,
+            "anio": anio
+        })
+
+        if pelicula_existente:
+            return render(request, "peliculas/crear.html")
+
         pelicula = {
             "titulo": titulo,
             "anio": anio,
@@ -198,7 +207,7 @@ def editar_pelicula(request, id):
 
     if not pelicula:
         return redirect("listar_peliculas")
-
+    
     pelicula["_id"] = str(pelicula["_id"])
 
     if request.method == "POST":
@@ -219,6 +228,16 @@ def editar_pelicula(request, id):
             anio > 2026 or
             not validar_url_poster(poster_url)
         ):
+            return render(request, "peliculas/editar.html", {"pelicula": pelicula})
+
+        #evitar duplicacion de pelicula en editar
+        pelicula_existente = peliculas.find_one({
+            "titulo": titulo,
+            "anio": anio,
+            "_id": {"$ne": ObjectId(id)}
+        })
+
+        if pelicula_existente:
             return render(request, "peliculas/editar.html", {"pelicula": pelicula})
 
         pelicula_actualizada = {
