@@ -1,27 +1,52 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>MovieGraph</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MovieGraph{% endblock %}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
 </head>
 <body>
-    <nav>
-        <a href="#">Películas</a>
-        {% if request.session.usuario_id %}
-            <span>Hola, {{ request.session.usuario_nombre }}</span>
-            <a href="{% url 'logout' %}">Cerrar sesión</a>
-        {% else %}
-            <a href="{% url 'login' %}">Login</a>
-            <a href="{% url 'registro' %}">Registro</a>
-        {% endif %}
+
+    <nav class="navbar">
+        <div class="logo">
+            🎬 MovieGraph
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'listar_peliculas' %}">Películas</a>
+
+            {% if request.session.usuario_id %}
+                <span class="usuario">
+                    Hola, {{ request.session.usuario_nombre }}
+                </span>
+
+                <a href="{% url 'logout' %}">Cerrar sesión</a>
+            {% else %}
+                <a href="{% url 'login' %}">Iniciar sesión</a>
+                <a href="{% url 'registro' %}">Registro</a>
+            {% endif %}
+        </div>
     </nav>
 
     {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
+        <div class="mensajes">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
     {% endif %}
 
-    {% block content %}{% endblock %}
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
+
 </body>
 </html>

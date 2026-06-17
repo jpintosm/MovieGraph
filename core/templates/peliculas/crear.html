@@ -1,16 +1,171 @@
 {% extends 'base.html' %}
 
+{% block title %}Nueva Película | MovieGraph{% endblock %}
+
 {% block content %}
-<h2>Nueva Película</h2>
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="titulo" placeholder="Título" required><br>
-    <input type="number" name="anio" placeholder="Año" required><br>
-    <input type="text" name="generos" placeholder="Géneros (separados por coma)"><br>
-    <input type="text" name="director" placeholder="Director"><br>
-    <input type="text" name="actores" placeholder="Actores (separados por coma)"><br>
-    <input type="text" name="poster_url" placeholder="URL del poster"><br>
-    <button type="submit">Guardar</button>
-</form>
-<a href="{% url 'listar_peliculas' %}">Volver</a>
+
+<div class="form-container">
+    <h2>Nueva Película</h2>
+
+    <p class="form-description">
+        Completa la información para registrar una nueva película en MovieGraph.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label for="titulo">Título</label>
+        <input 
+            type="text" 
+            id="titulo" 
+            name="titulo" 
+            placeholder="Ej: Inception" 
+            required
+        >
+
+        <label for="anio">Año</label>
+        <input 
+            type="number" 
+            id="anio" 
+            name="anio" 
+            placeholder="Ej: 2010" 
+            min="1888"
+            max="2027"
+            required
+        >
+
+        <label>Géneros</label>
+
+        <div class="checkbox-grid">
+            <label>
+                <input type="checkbox" name="generos" value="Acción">
+                Acción
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Aventura">
+                Aventura
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Animación">
+                Animación
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Comedia">
+                Comedia
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Drama">
+                Drama
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Terror">
+                Terror
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Suspenso">
+                Suspenso
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Ciencia ficción">
+                Ciencia ficción
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Fantasía">
+                Fantasía
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Romance">
+                Romance
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Documental">
+                Documental
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Crimen">
+                Crimen
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Misterio">
+                Misterio
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Musical">
+                Musical
+            </label>
+        </div>
+
+        <label for="director">Director</label>
+        <input 
+            type="text" 
+            id="director" 
+            name="director" 
+            placeholder="Ej: Andrew Stanton"
+            required
+        >
+
+        <label for="actores">Actores</label>
+        <input 
+            type="text" 
+            id="actores" 
+            name="actores" 
+            placeholder="Ej: Asa Butterfield, Tom Holland"
+            required
+        >
+
+        <small class="form-help">
+            Escribe los actores separados por coma.
+        </small>
+
+        <label for="poster_url">URL del póster</label>
+        <input 
+            type="url" 
+            id="poster_url" 
+            name="poster_url" 
+            placeholder="https://..."
+            required
+        >
+
+        <div class="acciones">
+            <button type="submit" class="btn">
+                Guardar película
+            </button>
+
+            <a href="{% url 'listar_peliculas' %}" class="btn btn-secondary">
+                Volver al catálogo
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('input[name="generos"]');
+
+    function validarGeneros() {
+        const algunoSeleccionado = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+        checkboxes.forEach(checkbox => {
+            checkbox.required = !algunoSeleccionado;
+        });
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', validarGeneros);
+    });
+
+    validarGeneros();
+</script>
 {% endblock %}

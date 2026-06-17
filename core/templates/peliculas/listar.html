@@ -1,23 +1,75 @@
 {% extends 'base.html' %}
 
+{% block title %}Catálogo de Películas | MovieGraph{% endblock %}
+
 {% block content %}
-<h2>Catálogo de Películas</h2>
-{% if request.session.usuario_rol == 'admin' %}
-    <a href="{% url 'crear_pelicula' %}">+ Nueva Película</a>
-{% endif %}
-<br><br>
-{% for pelicula in peliculas %}
+
+<section class="page-header">
     <div>
-        <h3>{{ pelicula.titulo }} ({{ pelicula.anio }})</h3>
-        <p>Director: {{ pelicula.director }}</p>
-        <a href="{% url 'detalle_pelicula' pelicula.id %}">Ver detalle</a> |
+        <h2>Catálogo de Películas</h2>
+        <p>Explora las películas registradas en MovieGraph.</p>
+    </div>
+
+    {% if request.session.usuario_rol == 'admin' %}
+        <a href="{% url 'crear_pelicula' %}" class="btn">
+            + Nueva Película
+        </a>
+    {% endif %}
+</section>
+
+{% if peliculas %}
+    <section class="peliculas-grid">
+        {% for pelicula in peliculas %}
+            <article class="pelicula-card">
+
+                {% if pelicula.poster_url %}
+                    <img src="{{ pelicula.poster_url }}" alt="Poster de {{ pelicula.titulo }}" class="poster">
+                {% endif %}
+
+                <h3>{{ pelicula.titulo }}</h3>
+
+                <p><strong>Año:</strong> {{ pelicula.anio }}</p>
+                <p><strong>Director:</strong> {{ pelicula.director }}</p>
+
+                {% if pelicula.generos %}
+                    <p>
+                        <strong>Géneros:</strong>
+                        {{ pelicula.generos|join:", " }}
+                    </p>
+                {% endif %}
+
+                <div class="acciones">
+                    <a href="{% url 'detalle_pelicula' pelicula.id %}" class="btn btn-secondary">
+                        Ver detalle
+                    </a>
+
+                    {% if request.session.usuario_rol == 'admin' %}
+                        <a href="{% url 'editar_pelicula' pelicula.id %}" class="btn btn-secondary">
+                            Editar
+                        </a>
+
+                        <a href="{% url 'eliminar_pelicula' pelicula.id %}" 
+                           class="btn btn-danger"
+                           onclick="return confirm('¿Estás segura de que deseas eliminar esta película?');">
+                            Eliminar
+                        </a>
+                    {% endif %}
+                </div>
+
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <div class="empty-state">
+        <h3>No hay películas registradas</h3>
+        <p>Cuando se agreguen películas, aparecerán en este catálogo.</p>
+
         {% if request.session.usuario_rol == 'admin' %}
-            <a href="{% url 'editar_pelicula' pelicula.id %}">Editar</a> |
-            <a href="{% url 'eliminar_pelicula' pelicula.id %}">Eliminar</a>
+            <a href="{% url 'crear_pelicula' %}" class="btn">
+                Agregar primera película
+            </a>
         {% endif %}
     </div>
-    <hr>
-{% empty %}
-    <p>No hay películas aún.</p>
-{% endfor %}
+{% endif %}
+
 {% endblock %}

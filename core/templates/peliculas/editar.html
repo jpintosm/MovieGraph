@@ -1,16 +1,186 @@
 {% extends 'base.html' %}
 
+{% block title %}Editar Película | MovieGraph{% endblock %}
+
 {% block content %}
-<h2>Editar Película</h2>
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="titulo" value="{{ pelicula.titulo }}" required><br>
-    <input type="number" name="anio" value="{{ pelicula.anio }}" required><br>
-    <input type="text" name="generos" value="{{ pelicula.generos|join:', ' }}"><br>
-    <input type="text" name="director" value="{{ pelicula.director }}"><br>
-    <input type="text" name="actores" value="{{ pelicula.actores|join:', ' }}"><br>
-    <input type="text" name="poster_url" value="{{ pelicula.poster_url }}"><br>
-    <button type="submit">Guardar cambios</button>
-</form>
-<a href="{% url 'listar_peliculas' %}">Volver</a>
+
+<div class="form-container">
+    <h2>Editar Película</h2>
+
+    <p class="form-description">
+        Modifica la información registrada de la película.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label for="titulo">Título</label>
+        <input 
+            type="text" 
+            id="titulo" 
+            name="titulo" 
+            value="{{ pelicula.titulo }}"
+            required
+        >
+
+        <label for="anio">Año</label>
+        <input 
+            type="number" 
+            id="anio" 
+            name="anio" 
+            value="{{ pelicula.anio }}"
+            min="1888"
+            max="2026"
+            required
+        >
+
+        <label>Géneros</label>
+
+        <div class="checkbox-grid">
+            <label>
+                <input type="checkbox" name="generos" value="Acción"
+                {% if "Acción" in pelicula.generos %}checked{% endif %}>
+                Acción
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Aventura"
+                {% if "Aventura" in pelicula.generos %}checked{% endif %}>
+                Aventura
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Animación"
+                {% if "Animación" in pelicula.generos %}checked{% endif %}>
+                Animación
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Comedia"
+                {% if "Comedia" in pelicula.generos %}checked{% endif %}>
+                Comedia
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Drama"
+                {% if "Drama" in pelicula.generos %}checked{% endif %}>
+                Drama
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Terror"
+                {% if "Terror" in pelicula.generos %}checked{% endif %}>
+                Terror
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Suspenso"
+                {% if "Suspenso" in pelicula.generos %}checked{% endif %}>
+                Suspenso
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Ciencia ficción"
+                {% if "Ciencia ficción" in pelicula.generos %}checked{% endif %}>
+                Ciencia ficción
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Fantasía"
+                {% if "Fantasía" in pelicula.generos %}checked{% endif %}>
+                Fantasía
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Romance"
+                {% if "Romance" in pelicula.generos %}checked{% endif %}>
+                Romance
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Documental"
+                {% if "Documental" in pelicula.generos %}checked{% endif %}>
+                Documental
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Crimen"
+                {% if "Crimen" in pelicula.generos %}checked{% endif %}>
+                Crimen
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Misterio"
+                {% if "Misterio" in pelicula.generos %}checked{% endif %}>
+                Misterio
+            </label>
+
+            <label>
+                <input type="checkbox" name="generos" value="Musical"
+                {% if "Musical" in pelicula.generos %}checked{% endif %}>
+                Musical
+            </label>
+        </div>
+
+        <label for="director">Director</label>
+        <input 
+            type="text" 
+            id="director" 
+            name="director" 
+            value="{{ pelicula.director }}"
+            required
+        >
+
+        <label for="actores">Actores</label>
+        <input 
+            type="text" 
+            id="actores" 
+            name="actores" 
+            value="{{ pelicula.actores|join:', ' }}"
+            required
+        >
+
+        <small class="form-help">
+            Escribe los actores separados por coma.
+        </small>
+
+        <label for="poster_url">URL del póster</label>
+        <input 
+            type="url" 
+            id="poster_url" 
+            name="poster_url" 
+            value="{{ pelicula.poster_url }}"
+            required
+        >
+
+        <div class="acciones">
+            <button type="submit" class="btn">
+                Guardar cambios
+            </button>
+
+            <a href="{% url 'listar_peliculas' %}" class="btn btn-secondary">
+                Volver al catálogo
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('input[name="generos"]');
+
+    function validarGeneros() {
+        const algunoSeleccionado = Array.from(checkboxes).some(checkbox => checkbox.checked);
+
+        checkboxes.forEach(checkbox => {
+            checkbox.required = !algunoSeleccionado;
+        });
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', validarGeneros);
+    });
+
+    validarGeneros();
+</script>
+
 {% endblock %}

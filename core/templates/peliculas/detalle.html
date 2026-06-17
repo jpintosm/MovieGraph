@@ -1,14 +1,57 @@
 {% extends 'base.html' %}
 
+{% block title %}{{ pelicula.titulo }} | MovieGraph{% endblock %}
+
 {% block content %}
-<h2>{{ pelicula.titulo }} ({{ pelicula.anio }})</h2>
-<p>Director: {{ pelicula.director }}</p>
-<p>Actores: {{ pelicula.actores|join:", " }}</p>
-<p>Géneros: {{ pelicula.generos|join:", " }}</p>
-{% if pelicula.poster_url %}
-    <img src="{{ pelicula.poster_url }}" alt="Poster" width="200">
-{% endif %}
-<br>
-<a href="{% url 'editar_pelicula' pelicula.id %}">Editar</a> |
-<a href="{% url 'listar_peliculas' %}">Volver</a>
+
+<section class="detalle-card detalle-layout">
+
+    {% if pelicula.poster_url %}
+        <div class="detalle-poster">
+            <img src="{{ pelicula.poster_url }}" alt="Póster de {{ pelicula.titulo }}">
+        </div>
+    {% endif %}
+
+    <div class="detalle-info">
+        <h2>{{ pelicula.titulo }}</h2>
+        <p class="detalle-anio">{{ pelicula.anio }}</p>
+
+        <div class="detalle-dato">
+            <strong>Director:</strong>
+            <span>{{ pelicula.director }}</span>
+        </div>
+
+        <div class="detalle-dato">
+            <strong>Actores:</strong>
+            <span>{{ pelicula.actores|join:", " }}</span>
+        </div>
+
+        <div class="detalle-dato">
+            <strong>Géneros:</strong>
+            <span>{{ pelicula.generos|join:", " }}</span>
+        </div>
+
+        <div class="acciones detalle-acciones">
+            {% if request.session.usuario_rol == 'admin' %}
+                <a href="{% url 'editar_pelicula' pelicula.id %}" class="btn">
+                    Editar película
+                </a>
+            {% endif %}
+
+            <a href="{% url 'listar_peliculas' %}" class="btn btn-secondary">
+                Volver al catálogo
+            </a>
+        </div>
+    </div>
+
+</section>
+
+<section class="resenas-section">
+    <h3>Reseñas</h3>
+
+    <p class="texto-secundario">
+        Próximamente se mostrarán aquí las reseñas y calificaciones de los usuarios.
+    </p>
+</section>
+
 {% endblock %}
