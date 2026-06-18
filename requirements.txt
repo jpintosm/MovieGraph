@@ -5,6 +5,7 @@ django-mongodb-backend==6.0.3
 dnspython==2.8.0
 neo4j==6.2.0
 pymongo==4.17.0
+python-dotenv==1.2.2
 pytz==2026.2
 sqlparse==0.5.5
 tzdata==2026.2
