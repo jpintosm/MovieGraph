@@ -11,9 +11,10 @@
     </div>
 
     {% if request.session.usuario_rol == 'admin' %}
-        <a href="{% url 'crear_pelicula' %}" class="btn">
-            + Nueva Película
-        </a>
+        <div style="display:flex; gap:10px;">
+            <a href="{% url 'crear_pelicula' %}" class="btn">+ Nueva Película</a>
+            <a href="{% url 'buscar_tmdb' %}" class="btn">🔍 Buscar en TMDB</a>
+        </div>
     {% endif %}
 </section>
 

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Buscar película en TMDB</h2>
+
+<form method="GET" action="{% url 'buscar_tmdb' %}">
+    <input type="text" name="q" placeholder="Buscar película..." value="{{ query|default:'' }}">
+    <button type="submit">Buscar</button>
+</form>
+
+<br>
+
+{% if resultados %}
+    {% for pelicula in resultados %}
+        <div style="display:flex; gap:15px; margin-bottom:20px; align-items:flex-start;">
+            {% if pelicula.poster_path %}
+                <img src="https://image.tmdb.org/t/p/w200{{ pelicula.poster_path }}" alt="Poster" width="100">
+            {% endif %}
+            <div>
+                <h3>{{ pelicula.title }} ({{ pelicula.release_date|slice:":4" }})</h3>
+                <p>{{ pelicula.overview|truncatewords:20 }}</p>
+                <a href="{% url 'importar_tmdb' pelicula.id %}">+ Importar</a>
+            </div>
+        </div>
+        <hr>
+    {% endfor %}
+{% elif query %}
+    <p>No se encontraron resultados para "{{ query }}".</p>
+{% endif %}
+
+<br>
+<a href="{% url 'listar_peliculas' %}">Volver al catálogo</a>
+{% endblock %}

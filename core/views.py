@@ -8,6 +8,7 @@ from bson import ObjectId
 from moviegraph_project.neo4j_connection import crear_pelicula_neo4j, actualizar_pelicula_neo4j, eliminar_pelicula_neo4j, obtener_peliculas_por_genero
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from .tmdb import buscar_pelicula, obtener_detalle_tmdb
 
 def normalizar_texto(texto):
     if not texto:
@@ -271,4 +272,40 @@ def eliminar_pelicula(request, id):
 
     eliminar_pelicula_neo4j(id)
 
+    return redirect("listar_peliculas")
+
+def buscar_tmdb(request):
+    if login_requerido(request):
+        return redirect("login")
+    if request.session.get("usuario_rol") != "admin":
+        return redirect("listar_peliculas")
+    
+    resultados = []
+    query = request.GET.get("q")
+    if query:
+        resultados = buscar_pelicula(query)
+    
+    return render(request, "peliculas/buscar_tmdb.html", {"resultados": resultados, "query": query})
+
+def importar_tmdb(request, tmdb_id):
+    if login_requerido(request):
+        return redirect("login")
+    if request.session.get("usuario_rol") != "admin":
+        return redirect("listar_peliculas")
+    
+    pelicula = obtener_detalle_tmdb(tmdb_id)
+    
+    # Verificar si ya existe por título y año
+    existe = peliculas.find_one({
+        "titulo": {"$regex": f"^{pelicula['titulo']}$", "$options": "i"},
+        "anio": pelicula["anio"]
+    })
+    
+    if existe:
+        messages.error(request, f"'{pelicula['titulo']}' ya existe en el catálogo.")
+        return redirect("buscar_tmdb")
+    
+    resultado = peliculas.insert_one({**pelicula, "resenas": []})
+    crear_pelicula_neo4j(str(resultado.inserted_id), pelicula)
+    
     return redirect("listar_peliculas")
