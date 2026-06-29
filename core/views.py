@@ -5,7 +5,7 @@ from .db import usuarios, peliculas
 import bcrypt
 from datetime import datetime
 from bson import ObjectId
-from moviegraph_project.neo4j_connection import crear_pelicula_neo4j, actualizar_pelicula_neo4j, eliminar_pelicula_neo4j, obtener_peliculas_por_genero
+from moviegraph_project.neo4j_connection import crear_pelicula_neo4j, actualizar_pelicula_neo4j, eliminar_pelicula_neo4j, obtener_peliculas_por_genero, agregar_reaccion, obtener_reaccion
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from .tmdb import buscar_pelicula, obtener_detalle_tmdb
@@ -195,7 +195,39 @@ def detalle_pelicula(request, id):
 
     pelicula = peliculas.find_one({"_id": ObjectId(id)})
     pelicula["id"] = str(pelicula["_id"])
-    return render(request, "peliculas/detalle.html", {"pelicula": pelicula})
+    
+    # Registrar en historial del usuario
+    usuario_id = request.session.get("usuario_id")
+    usuarios.update_one(
+        {"_id": ObjectId(usuario_id)},
+        {"$push": {"historial": {
+            "pelicula_id": id,
+            "titulo": pelicula["titulo"],
+            "poster_url": pelicula.get("poster_url", ""),
+            "fecha": datetime.now()
+        }}}
+    )
+
+    # Paginación de reseñas
+    pagina = int(request.GET.get("pagina", 1))
+    por_pagina = 5
+    resenas = pelicula.get("resenas", [])
+    total_resenas = len(resenas)
+    total_paginas = (total_resenas + por_pagina - 1) // por_pagina
+    inicio = (pagina - 1) * por_pagina
+    fin = inicio + por_pagina
+    resenas_pagina = resenas[inicio:fin]
+    pelicula["resenas"] = resenas_pagina
+    
+    usuario_id = request.session.get("usuario_id")
+    reaccion = obtener_reaccion(usuario_id, id)
+    
+    return render(request, "peliculas/detalle.html", {
+        "pelicula": pelicula,
+        "reaccion": reaccion,
+        "pagina": pagina,
+        "total_paginas": total_paginas,
+    })
 
 def editar_pelicula(request, id):
     if login_requerido(request):
@@ -309,3 +341,62 @@ def importar_tmdb(request, tmdb_id):
     crear_pelicula_neo4j(str(resultado.inserted_id), pelicula)
     
     return redirect("listar_peliculas")
+
+def agregar_resena(request, id):
+    if login_requerido(request):
+        return redirect("login")
+    
+    if request.method == "POST":
+        usuario_id = request.session.get("usuario_id")
+        puntuacion = int(request.POST.get("puntuacion"))
+        comentario = request.POST.get("comentario")
+        
+        # Verificar si ya reseñó esta película
+        #pelicula = peliculas.find_one({
+        #    "_id": ObjectId(id),
+        #    "resenas.usuario_id": usuario_id
+        #})
+        
+        #if pelicula:
+        #    messages.error(request, "Ya has reseñado esta película.")
+        #    return redirect("detalle_pelicula", id=id)
+        
+        resena = {
+            "usuario_id": usuario_id,
+            "usuario_nombre": request.session.get("usuario_nombre"),
+            "puntuacion": puntuacion,
+            "comentario": comentario,
+            "fecha": datetime.now()
+        }
+        
+        peliculas.update_one(
+            {"_id": ObjectId(id)},
+            {"$push": {"resenas": resena}}
+        )
+        
+        messages.success(request, "Reseña agregada correctamente.")
+        return redirect("detalle_pelicula", id=id)
+    
+    return redirect("detalle_pelicula", id=id)
+
+def reaccionar_pelicula(request, id, tipo):
+    if login_requerido(request):
+        return redirect("login")
+    
+    usuario_id = request.session.get("usuario_id")
+    agregar_reaccion(usuario_id, id, tipo)
+    
+    return redirect("detalle_pelicula", id=id)
+
+def historial(request):
+    if login_requerido(request):
+        return redirect("login")
+    
+    usuario_id = request.session.get("usuario_id")
+    usuario = usuarios.find_one({"_id": ObjectId(usuario_id)})
+    historial_usuario = usuario.get("historial", [])
+    
+    # Mostrar más reciente primero
+    historial_usuario = list(reversed(historial_usuario))
+    
+    return render(request, "historial.html", {"historial": historial_usuario})

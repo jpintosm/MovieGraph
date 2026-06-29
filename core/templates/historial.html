@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Historial | MovieGraph{% endblock %}
+
+{% block content %}
+<h2 style="color: #ffffff; margin-bottom: 24px;">Mi Historial</h2>
+
+{% if historial %}
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        {% for entrada in historial %}
+            <div style="display: flex; gap: 16px; align-items: center; padding: 16px; background-color: #1e293b; border-radius: 8px;">
+                {% if entrada.poster_url %}
+                    <img src="{{ entrada.poster_url }}" alt="{{ entrada.titulo }}" width="60" style="border-radius: 4px;">
+                {% endif %}
+                <div>
+                    <p style="margin: 0 0 4px 0; font-weight: 600; color: #ffffff;">{{ entrada.titulo }}</p>
+                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">{{ entrada.fecha }}</p>
+                </div>
+                <a href="{% url 'detalle_pelicula' entrada.pelicula_id %}" 
+                   style="margin-left: auto; color: #94a3b8; text-decoration: none; font-size: 0.9rem;">
+                    Ver detalle →
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p style="color: #64748b; font-style: italic;">No has visitado ninguna película aún.</p>
+{% endif %}
+{% endblock %}

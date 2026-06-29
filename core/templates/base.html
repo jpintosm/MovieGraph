@@ -15,18 +15,18 @@
 <body>
 
     <nav class="navbar">
-        <div class="logo">
-            🎬 MovieGraph
-        </div>
+        <a href="{% if request.session.usuario_id %}{% url 'listar_peliculas' %}{% else %}{% url 'inicio' %}{% endif %}" 
+            class="logo" 
+            aria-label="Ir al inicio" 
+            style="text-decoration: none; color: inherit;">🎬 MovieGraph</a>
 
         <div class="nav-links">
             <a href="{% url 'listar_peliculas' %}">Películas</a>
 
+            
             {% if request.session.usuario_id %}
-                <span class="usuario">
-                    Hola, {{ request.session.usuario_nombre }}
-                </span>
-
+                <a href="{% url 'historial' %}">Mi Historial</a>
+                <span>Hola, {{ request.session.usuario_nombre }}</span>
                 <a href="{% url 'logout' %}">Cerrar sesión</a>
             {% else %}
                 <a href="{% url 'login' %}">Iniciar sesión</a>

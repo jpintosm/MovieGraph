@@ -131,4 +131,47 @@ def obtener_peliculas_por_genero(genero):
     """, {"genero": genero})
     return [r["id"] for r in resultado]
 
+
+def sincronizar_usuario_neo4j(usuario_id, usuario_nombre):
+    neo4j_conn.query("""
+    MERGE (u:Usuario {id: $id})
+    SET u.nombre = $nombre
+    """, {
+        "id": str(usuario_id),
+        "nombre": usuario_nombre or ""
+    })
+
+def agregar_reaccion(usuario_id, pelicula_id, tipo):
+    # Eliminar reacción anterior si existe
+    neo4j_conn.query("""
+        MATCH (u:Usuario {id: $usuario_id})-[r]->(p:Pelicula {id: $pelicula_id})
+        WHERE type(r) IN ['LE_GUSTA', 'NO_LE_GUSTA']
+        DELETE r
+        """, {"usuario_id": usuario_id, "pelicula_id": pelicula_id})
+    
+    # Crear nueva reacción
+    if tipo == "gusta":
+        neo4j_conn.query("""
+        MERGE (u:Usuario {id: $usuario_id})
+        MERGE (p:Pelicula {id: $pelicula_id})
+        MERGE (u)-[:LE_GUSTA]->(p)
+        """, {"usuario_id": usuario_id, "pelicula_id": pelicula_id})
+    else:
+        neo4j_conn.query("""
+        MERGE (u:Usuario {id: $usuario_id})
+        MERGE (p:Pelicula {id: $pelicula_id})
+        MERGE (u)-[:NO_LE_GUSTA]->(p)
+        """, {"usuario_id": usuario_id, "pelicula_id": pelicula_id})
+
+def obtener_reaccion(usuario_id, pelicula_id):
+    resultado = neo4j_conn.query("""
+    MATCH (u:Usuario {id: $usuario_id})-[r]->(p:Pelicula {id: $pelicula_id})
+    WHERE type(r) IN ['LE_GUSTA', 'NO_LE_GUSTA']
+    RETURN type(r) AS tipo
+    """, {"usuario_id": usuario_id, "pelicula_id": pelicula_id})
+    
+    if resultado:
+        return "gusta" if resultado[0]["tipo"] == "LE_GUSTA" else "no_gusta"
+    return None
+
 neo4j_conn = Neo4jConnection()

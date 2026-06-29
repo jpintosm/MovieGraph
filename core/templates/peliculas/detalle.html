@@ -13,7 +13,33 @@
     {% endif %}
 
     <div class="detalle-info">
-        <h2>{{ pelicula.titulo }}</h2>
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 4px;">
+            <h2 style="margin: 0;">{{ pelicula.titulo }}</h2>
+            
+            <div style="display: flex; gap: 10px; font-size: 1.8rem;">
+                <a href="{% url 'reaccionar_pelicula' pelicula.id 'gusta' %}" 
+                style="text-decoration: none; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.2)'"
+                onmouseout="this.style.transform='scale(1)'">
+                    {% if reaccion == 'gusta' %}
+                        <span style="color: #e11d48;">♥</span>
+                    {% else %}
+                        <span style="color: #475569;">♡</span>
+                    {% endif %}
+                </a>
+
+                <a href="{% url 'reaccionar_pelicula' pelicula.id 'no_gusta' %}"
+                style="text-decoration: none; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.2)'"
+                onmouseout="this.style.transform='scale(1)'">
+                    {% if reaccion == 'no_gusta' %}
+                        <span style="color: #e11d48;">✕</span>
+                    {% else %}
+                        <span style="color: #475569;">✕</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
         <p class="detalle-anio">{{ pelicula.anio }}</p>
 
         <div class="detalle-dato">
@@ -46,12 +72,123 @@
 
 </section>
 
-<section class="resenas-section">
-    <h3>Reseñas</h3>
 
-    <p class="texto-secundario">
-        Próximamente se mostrarán aquí las reseñas y calificaciones de los usuarios.
-    </p>
+<section class="resenas-section" style="width: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e2e8f0; margin-top: 40px; box-sizing: border-box;">
+    
+    <hr style="border: 0; border-top: 1px solid #334155; margin-bottom: 32px;">
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 48px; width: 100%;">
+        
+        <div>
+            <h4 style="font-size: 1.2rem; font-weight: 500; margin-top: 0; margin-bottom: 20px; color: #ffffff; letter-spacing: -0.02em;">Agregar reseña</h4>
+            
+            <form method="POST" action="{% url 'agregar_resena' pelicula.id %}" style="display: flex; flex-direction: column; gap: 20px;">
+                {% csrf_token %}
+                
+                <div>
+                    <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #94a3b8;">Puntuación</p>
+                    
+                    <div style="display: flex; flex-direction: row; justify-content: flex-start; gap: 4px;">
+                        {% for i in "123456789" %}
+                            <input type="radio" name="puntuacion" id="star{{ i }}" value="{{ i }}" required style="display: none;">
+                            <label for="star{{ i }}" 
+                                   style="font-size: 1.8rem; color: #334155; cursor: pointer; transition: color 0.1s;"
+                                   onmouseover="highlightStars('{{ i }}')"
+                                   onmouseout="resetStars()"
+                                   onclick="selectStar('{{ i }}')">★</label>
+                        {% endfor %}
+                        <input type="radio" name="puntuacion" id="star10" value="10" required style="display: none;">
+                        <label for="star10" 
+                               style="font-size: 1.8rem; color: #334155; cursor: pointer; transition: color 0.1s;"
+                               onmouseover="highlightStars(10)"
+                               onmouseout="resetStars()"
+                               onclick="selectStar(10)">★</label>
+                    </div>
+                    
+                    <p id="star-label" style="margin: 6px 0 0 0; font-size: 0.85rem; color: #64748b;">Selecciona una puntuación</p>
+                </div>
+                
+                <textarea name="comentario" 
+                          rows="4" 
+                          placeholder="Escribe tu comentario aquí..." 
+                          required 
+                          style="width: 100%; padding: 12px; background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; font-size: 0.95rem; font-family: inherit; color: #ffffff; resize: vertical; outline: none; box-sizing: border-box; transition: border-color 0.2s;"
+                          onfocus="this.style.borderColor='#64748b'" 
+                          onblur="this.style.borderColor='#334155'"></textarea>
+                
+                <button type="submit" 
+                        style="align-self: flex-start; padding: 12px 24px; background-color: #f8fafc; color: #0f172a; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s;"
+                        onmouseover="this.style.backgroundColor='#e2e8f0'" 
+                        onmouseout="this.style.backgroundColor='#f8fafc'">
+                    Enviar reseña
+                </button>
+            </form>
+        </div>
+
+        <div>
+            <h3 style="font-size: 1.3rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; color: #ffffff; letter-spacing: -0.02em;">Reseñas</h3>
+
+            {% if pelicula.resenas %}
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    {% for resena in pelicula.resenas %}
+                        <div style="padding-bottom: 20px; border-bottom: 1px solid #1e293b;">
+                            <p style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 600; color: #ffffff;">
+                                {{ resena.usuario_nombre }}
+                            </p>
+                            <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 600; color: #94a3b8;">
+                                Puntuación: <span style="color: #38bdf8; font-size: 1.05rem;">{{ resena.puntuacion }}</span>/10
+                            </p>
+                            <p style="margin: 0; font-size: 0.95rem; line-height: 1.6; color: #cbd5e1;">
+                                {{ resena.comentario }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="margin: 0; font-size: 0.95rem; color: #64748b; font-style: italic;">No hay reseñas aún.</p>
+            {% endif %}
+
+            {% if total_paginas > 1 %}
+                <div style="display: flex; gap: 8px; margin-top: 20px; align-items: center; justify-content: flex-end;">
+                    {% if pagina > 1 %}
+                        <a href="?pagina={{ pagina|add:'-1' }}" style="color: #94a3b8; text-decoration: none;">← Anterior</a>
+                    {% endif %}
+                    
+                    <span style="color: #64748b; font-size: 0.9rem;">{{ pagina }} / {{ total_paginas }}</span>
+                    
+                    {% if pagina < total_paginas %}
+                        <a href="?pagina={{ pagina|add:'1' }}" style="color: #94a3b8; text-decoration: none;">Siguiente →</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </section>
+
+<script>
+function highlightStars(n) {
+    document.querySelectorAll('label[for^="star"]').forEach(l => {
+        const val = parseInt(l.getAttribute('for').replace('star',''), 10);
+        l.style.color = val <= n ? '#f59e0b' : '#334155';
+    });
+}
+
+function resetStars() {
+    const selected = document.querySelector('input[name="puntuacion"]:checked');
+    document.querySelectorAll('label[for^="star"]').forEach(l => {
+        const val = parseInt(l.getAttribute('for').replace('star',''), 10);
+        if (selected) {
+            l.style.color = val <= parseInt(selected.value, 10) ? '#f59e0b' : '#334155';
+        } else {
+            l.style.color = '#334155';
+        }
+    });
+}
+
+function selectStar(n) {
+    document.getElementById('star-label').textContent = n + '/10';
+    document.getElementById('star' + n).checked = true;
+}
+</script>
 
 {% endblock %}
